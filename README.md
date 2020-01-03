@@ -71,3 +71,5 @@ License: Apache 2 (see [included LICENSE file](https://github.com/themattharris/
 Follow [@tmhOAuth](https://twitter.com/intent/follow?screen_name=tmhOAuth) to receive updates on releases, or ask for support
 Follow me on Twitter: [@themattharris](https://twitter.com/intent/follow?screen_name=themattharris)
 Check out the Twitter Developer Resources: <https://dev.twitter.com>
+
+.
