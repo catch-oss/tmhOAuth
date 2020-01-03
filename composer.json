@@ -1,5 +1,5 @@
 {
-  "name": "AxisPointAlliance/tmhoauth",
+  "name": "axispointalliance/tmhoauth",
   "description": "An OAuth library written in PHP by @themattharris",
   "license": "Apache-2.0",
   "authors": [
@@ -14,7 +14,7 @@
     "oauth"
   ],
   "support": {
-    "issues": "https://github.com/themattharris/tmhOAuth/issues"
+    "issues": "https://github.com/AxisPointAlliance/tmhOAuth/issues"
   },
   "require": {
     "php": ">=5.3.0",
