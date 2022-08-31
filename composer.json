@@ -1,5 +1,5 @@
 {
-  "name": "catchnz/tmhoauth",
+  "name": "catch/tmhoauth",
   "description": "An OAuth library written in PHP by @themattharris",
   "license": "Apache-2.0",
   "authors": [
