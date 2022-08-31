@@ -1,4 +1,5 @@
 <?php
+namespace themattharris;
 /**
  * tmhOAuth
  *
