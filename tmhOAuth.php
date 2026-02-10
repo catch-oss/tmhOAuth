@@ -19,7 +19,7 @@ use Exception;
  */
 class tmhOAuth
 {
-  const VERSION = '0.8.5';
+  public const VERSION = '0.8.5';
   public array $response = [];
   private ?string $buffer = null;
   public array $config = [];
@@ -281,10 +281,10 @@ class tmhOAuth
   {
     $parts = parse_url($this->request_settings['url']);
 
-    $port   = isset($parts['port']) ? $parts['port'] : false;
+    $port   = $parts['port'] ?? false;
     $scheme = $parts['scheme'];
     $host   = $parts['host'];
-    $path   = isset($parts['path']) ? $parts['path'] : false;
+    $path   = $parts['path'] ?? false;
 
     $port or $port = ($scheme == 'https') ? '443' : '80';
 
@@ -714,7 +714,7 @@ class tmhOAuth
    * Utility function to parse the returned curl headers and store them in the
    * class array variable.
    */
-  private function curlHeader(mixed $ch, string $header): int
+  private function curlHeader(\CurlHandle $ch, string $header): int
   {
     $this->response['raw'] .= $header;
 
@@ -742,7 +742,7 @@ class tmhOAuth
    *
    * This function calls the previously defined streaming callback method.
    */
-  private function curlWrite(mixed $ch, string $data): int
+  private function curlWrite(\CurlHandle $ch, string $data): int
   {
     $l = strlen($data);
     if (!str_contains($data, $this->config['streaming_eol'])) {
