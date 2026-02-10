@@ -1,0 +1,50 @@
+name: Tests (PHP)
+
+on:
+  push:
+    branches: [master, main, release/*, feature/*]
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: curl, mbstring, dom, xml
+          ini-values: memory_limit=512M
+          coverage: pcov
+          tools: composer:v2
+
+      - name: Cache Composer deps
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache/files
+          key: composer-${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-
+
+      - name: Install Composer deps
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Run tests
+        run: |
+          mkdir -p coverage/php
+          if [ -f vendor/bin/phpunit ]; then
+            vendor/bin/phpunit --log-junit coverage/php/junit.xml --coverage-clover coverage/php/coverage.xml
+          else
+            echo "No PHPUnit installed yet - skipping tests"
+          fi
+
+      - name: Upload test artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: coverage/
+          if-no-files-found: warn
