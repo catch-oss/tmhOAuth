@@ -12,13 +12,16 @@ to report any enhancements or issues you encounter.
 - Allow uploading of images
 - Provide enough information to assist with debugging
 
+## Compatibility
+
+| Branch | PHP | Notes |
+|--------|-----|-------|
+| release/6 | ^8.5 | PHP 8.5 modernized, PHPUnit 11 |
+| release/5 | ~8.4 | Legacy SS5-era |
+
 ## Dependencies
 
-The library has been tested with PHP 5.3+ and relies on CURL and hash_hmac. The
-vast majority of hosting providers include these libraries and run with PHP 5.1+.
-
-The code makes use of hash_hmac, which was introduced in PHP 5.1.2. If your version
-of PHP is lower than this you should ask your hosting provider for an update.
+The library relies on CURL and hash_hmac.
 
 ## A note about security and SSL
 
