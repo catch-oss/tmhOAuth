@@ -71,10 +71,11 @@ jobs:
       - name: Fail job if Quality Gate fails
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_REF: ${{ steps.sonar-ref.outputs.ref }}
         run: |
           if ! RESPONSE=$(curl --fail --silent \
             -H "Authorization: Bearer $SONAR_TOKEN" \
-            "https://sonarcloud.io/api/measures/component?metricKeys=alert_status&component=$SONAR_PROJECT_KEY&${{ steps.sonar-ref.outputs.ref }}"); then
+            "https://sonarcloud.io/api/measures/component?metricKeys=alert_status&component=$SONAR_PROJECT_KEY&$SONAR_REF"); then
             echo "Failed to fetch quality gate status from SonarCloud API"
             exit 1
           fi
@@ -87,8 +88,9 @@ jobs:
         id: sonarqube-report
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_REF: ${{ steps.sonar-ref.outputs.ref }}
         run: |
-          REF="${{ steps.sonar-ref.outputs.ref }}"
+          REF="$SONAR_REF"
 
           if ! DATA=$(curl --fail --silent --request GET \
             --url "https://sonarcloud.io/api/measures/component?metricKeys=alert_status%2Cbugs%2Ccode_smells%2Ccoverage%2Cduplicated_lines_density%2Cncloc%2Creliability_rating%2Csecurity_rating%2Csqale_index%2Csqale_rating%2Cvulnerabilities&component=$SONAR_PROJECT_KEY&$REF" \
