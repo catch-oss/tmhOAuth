@@ -1,5 +1,20 @@
 # tmhOAuth
 
+<!-- PROJECT SHIELDS -->
+[![SonarCloud](https://github.com/catch-oss/tmhOAuth/actions/workflows/sonar.yml/badge.svg)](https://github.com/catch-oss/tmhOAuth/actions/workflows/sonar.yml)
+[![Test](https://github.com/catch-oss/tmhOAuth/actions/workflows/test.yml/badge.svg)](https://github.com/catch-oss/tmhOAuth/actions/workflows/test.yml)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=catch-design_catch-oss-tmhoauth&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=catch-design_catch-oss-tmhoauth)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=catch-design_catch-oss-tmhoauth&metric=bugs)](https://sonarcloud.io/component_measures?id=catch-design_catch-oss-tmhoauth)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=catch-design_catch-oss-tmhoauth&metric=code_smells)](https://sonarcloud.io/component_measures?id=catch-design_catch-oss-tmhoauth)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=catch-design_catch-oss-tmhoauth&metric=coverage)](https://sonarcloud.io/component_measures?id=catch-design_catch-oss-tmhoauth)
+[![Duplicated Lines Density](https://sonarcloud.io/api/project_badges/measure?project=catch-design_catch-oss-tmhoauth&metric=duplicated_lines_density)](https://sonarcloud.io/component_measures?id=catch-design_catch-oss-tmhoauth)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=catch-design_catch-oss-tmhoauth&metric=ncloc)](https://sonarcloud.io/component_measures?id=catch-design_catch-oss-tmhoauth)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=catch-design_catch-oss-tmhoauth&metric=reliability_rating)](https://sonarcloud.io/component_measures?id=catch-design_catch-oss-tmhoauth)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=catch-design_catch-oss-tmhoauth&metric=security_rating)](https://sonarcloud.io/component_measures?id=catch-design_catch-oss-tmhoauth)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=catch-design_catch-oss-tmhoauth&metric=sqale_index)](https://sonarcloud.io/component_measures?id=catch-design_catch-oss-tmhoauth)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=catch-design_catch-oss-tmhoauth&metric=sqale_rating)](https://sonarcloud.io/component_measures?id=catch-design_catch-oss-tmhoauth)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=catch-design_catch-oss-tmhoauth&metric=vulnerabilities)](https://sonarcloud.io/component_measures?id=catch-design_catch-oss-tmhoauth)
+
 An OAuth library written in PHP by @themattharris.
 
 **Disclaimer**: This project is a work in progress. Please use the issue tracker

@@ -2,15 +2,30 @@ name: SonarCloud
 
 on:
   workflow_run:
-    workflows:
-      - Tests (PHP)
-    types:
-      - completed
+    workflows: ["Tests (PHP)"]
+    types: [completed]
 
 jobs:
-  sonarqube:
-    name: SonarQube
+  sonarcloud:
+    name: SonarCloud
     runs-on: ubuntu-latest
+
+    env:
+      SONAR_PROJECT_KEY: catch-design_catch-oss-tmhoauth
+
+    outputs:
+      alert_status: ${{ steps.sonarqube-report.outputs.alert_status }}
+      bugs: ${{ steps.sonarqube-report.outputs.bugs }}
+      code_smells: ${{ steps.sonarqube-report.outputs.code_smells }}
+      coverage: ${{ steps.sonarqube-report.outputs.coverage }}
+      duplicated_lines_density: ${{ steps.sonarqube-report.outputs.duplicated_lines_density }}
+      ncloc: ${{ steps.sonarqube-report.outputs.ncloc }}
+      reliability_rating: ${{ steps.sonarqube-report.outputs.reliability_rating }}
+      security_rating: ${{ steps.sonarqube-report.outputs.security_rating }}
+      sqale_index: ${{ steps.sonarqube-report.outputs.sqale_index }}
+      sqale_rating: ${{ steps.sonarqube-report.outputs.sqale_rating }}
+      vulnerabilities: ${{ steps.sonarqube-report.outputs.vulnerabilities }}
+      git_ref: ${{ steps.sonarqube-report.outputs.git_ref }}
 
     permissions:
       actions: read
@@ -20,9 +35,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          repository: ${{ github.event.workflow_run.head_repository.full_name }}
+          ref: ${{ github.event.workflow_run.head_sha }}
           fetch-depth: 0
 
       - name: Download test artifacts
+        continue-on-error: true
         uses: actions/download-artifact@v5
         with:
           name: test-results
@@ -30,12 +48,78 @@ jobs:
           run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: SonarQube Scan
+      - name: SonarCloud Scan
+        id: sonarqube-scan
         uses: SonarSource/sonarqube-scan-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Resolve SonarCloud ref
+        id: sonar-ref
+        run: |
+          if [ "${{ github.event.workflow_run.pull_requests[0].number }}" != "" ]; then
+            echo "ref=pullRequest=${{ github.event.workflow_run.pull_requests[0].number }}" >> "$GITHUB_OUTPUT"
+          else
+            ENCODED_REF=$(echo "${{ github.event.workflow_run.head_branch }}" | jq -sRr @uri)
+            echo "ref=branch=$ENCODED_REF" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Fail job if Quality Gate fails
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          if ! RESPONSE=$(curl --fail --silent \
+            -H "Authorization: Bearer $SONAR_TOKEN" \
+            "https://sonarcloud.io/api/measures/component?metricKeys=alert_status&component=$SONAR_PROJECT_KEY&${{ steps.sonar-ref.outputs.ref }}"); then
+            echo "Failed to fetch quality gate status from SonarCloud API"
+            exit 1
+          fi
+
+          STATUS=$(echo "$RESPONSE" | jq -r '.component.measures[0].value // "ERROR"')
+          echo "Quality Gate: ${STATUS}"
+          [ "$STATUS" = "OK" ] || { echo "Quality Gate failed with status: $STATUS"; exit 1; }
+
+      - name: Output SonarCloud metrics
+        id: sonarqube-report
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          REF="${{ steps.sonar-ref.outputs.ref }}"
+
+          if ! DATA=$(curl --fail --silent --request GET \
+            --url "https://sonarcloud.io/api/measures/component?metricKeys=alert_status%2Cbugs%2Ccode_smells%2Ccoverage%2Cduplicated_lines_density%2Cncloc%2Creliability_rating%2Csecurity_rating%2Csqale_index%2Csqale_rating%2Cvulnerabilities&component=$SONAR_PROJECT_KEY&$REF" \
+            --header "Authorization: Bearer $SONAR_TOKEN"); then
+            echo "Failed to fetch metrics from SonarCloud API"
+            exit 1
+          fi
+
+          for metric in alert_status bugs code_smells coverage duplicated_lines_density ncloc reliability_rating security_rating sqale_index sqale_rating vulnerabilities; do
+            value=$(echo "$DATA" | jq -r --arg m "$metric" '.component.measures[] | select(.metric == $m) | .value')
+            echo "${metric}=${value}" >> "$GITHUB_OUTPUT"
+          done
+          echo "git_ref=${REF}" >> "$GITHUB_OUTPUT"
+
+      - name: Comment PR
+        uses: thollander/actions-comment-pull-request@v3
+        if: github.event.workflow_run.pull_requests[0].number != ''
         with:
-          args: >
-            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
-            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
+          pr-number: ${{ github.event.workflow_run.pull_requests[0].number }}
+          message: |
+            ## SonarCloud Analysis Results
+            ### Quality Gate Status: ${{ steps.sonarqube-report.outputs.alert_status }}
+            ### Metrics
+            - **Bugs**: ${{ steps.sonarqube-report.outputs.bugs }}
+            - **Code Smells**: ${{ steps.sonarqube-report.outputs.code_smells }}
+            - **Coverage**: ${{ steps.sonarqube-report.outputs.coverage }}
+            - **Duplicated Lines Density**: ${{ steps.sonarqube-report.outputs.duplicated_lines_density }}
+            - **Lines of Code (ncloc)**: ${{ steps.sonarqube-report.outputs.ncloc }}
+            - **Reliability Rating**: ${{ steps.sonarqube-report.outputs.reliability_rating }}
+            - **Security Rating**: ${{ steps.sonarqube-report.outputs.security_rating }}
+            - **Technical Debt (sqale index)**: ${{ steps.sonarqube-report.outputs.sqale_index }}
+            - **Maintainability Rating**: ${{ steps.sonarqube-report.outputs.sqale_rating }}
+            - **Vulnerabilities**: ${{ steps.sonarqube-report.outputs.vulnerabilities }}
+            ### More details
+            - [SonarCloud dashboard](https://sonarcloud.io/dashboard?id=catch-design_catch-oss-tmhoauth&${{ steps.sonarqube-report.outputs.git_ref }})
+            - [View the full report](https://sonarcloud.io/project/issues?id=catch-design_catch-oss-tmhoauth&${{ steps.sonarqube-report.outputs.git_ref }}&resolved=false)
+            - [View the Quality Gate](https://sonarcloud.io/summary/new_code?id=catch-design_catch-oss-tmhoauth&${{ steps.sonarqube-report.outputs.git_ref }})
